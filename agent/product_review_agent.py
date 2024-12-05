@@ -31,6 +31,9 @@ warnings.filterwarnings("ignore")
 import pickle
 import logging
 import shutil
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -73,14 +76,14 @@ def split_text(documents: list[Document]):
     return chunks  # Return the list of split text chunks
 
     
-def initialize_vectorstore(documents, embeddings_list, vectorstore_path: str = '/home/user/app/docs/chroma/') -> Chroma:
+def initialize_vectorstore(documents, embeddings_list, vectorstore_path: str = 'data/chroma/') -> Chroma:
     
     vectordb = None
-    current_dir = os.getcwd()
-    print(f"Current working directory: {current_dir}")
-    # To list all files and directories in current directory:
-    print("\nContents of current directory:")
-    print(os.listdir(current_dir))
+    # current_dir = os.getcwd()
+    # print(f"Current working directory: {current_dir}")
+    # # To list all files and directories in current directory:
+    # print("\nContents of current directory:")
+    # print(os.listdir(current_dir))
     try:
         # Create directory if it doesn't exist
         logger.info("Creating directory if it doesn't exist...")
@@ -101,7 +104,7 @@ def initialize_vectorstore(documents, embeddings_list, vectorstore_path: str = '
         else:
 
             # Remove the old database files if any
-            shutil.rmtree('./docs/chroma', ignore_errors=True)
+            shutil.rmtree('data/chroma', ignore_errors=True)
 
             # Create new vectorstore
             logger.info(f"Creating new vectorstore at {vectorstore_path}")
@@ -114,7 +117,7 @@ def initialize_vectorstore(documents, embeddings_list, vectorstore_path: str = '
             # Persist the vectorstore
             vectordb.persist()
             # Create a zip file of the vectorstore directory
-            shutil.make_archive('vectorstore', 'zip', vectorstore_path)
+            # shutil.make_archive('vectorstore', 'zip', vectorstore_path)
             logger.info("Vectorstore created and persisted successfully")
             collections = vectordb._client.list_collections()
             logger.info(f"New collections: {collections}")
@@ -210,9 +213,9 @@ responding. Don't make assumptions or provide speculative information.
         chat_history = "\n".join(f"{'Human' if isinstance(msg, HumanMessage) else 'Assistant'}: {msg.content}" for msg in messages)
 
     # Check if embeddings already exist
-    embedding_path = './data/embeddings.npy'
-    documents_path = './documents.pkl'
-    file_path = './data/cleaned_dataset_full.csv'
+    embedding_path = 'data/embeddings.npy'
+    documents_path = 'documents.pkl'
+    file_path = 'data/cleaned_dataset_full.csv'
 
     try:
         if not os.path.exists(embedding_path):
@@ -249,7 +252,7 @@ responding. Don't make assumptions or provide speculative information.
     vectordb = initialize_vectorstore(
         documents=split_chunks,
         embeddings_list=embeddings,  
-        vectorstore_path='/home/user/app/docs/chroma/'
+        vectorstore_path='data/chroma/'
     )
 
     # *****************************************************************************************
